@@ -1,4 +1,5 @@
 package com.locknote.locknote.service;
+import com.locknote.locknote.config.JwtUtil;
 import com.locknote.locknote.dto.RegisterRequest;
 import com.locknote.locknote.model.User;
 import com.locknote.locknote.repository.UserRepository;

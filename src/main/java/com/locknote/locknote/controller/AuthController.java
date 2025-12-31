@@ -1,5 +1,6 @@
 package com.locknote.locknote.controller;
 
+import com.locknote.locknote.dto.LoginRequest;
 import com.locknote.locknote.dto.RegisterRequest;
 import com.locknote.locknote.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -20,4 +21,15 @@ public class AuthController {
         userService.register(request);
         return ResponseEntity.ok("User registered successfully");
     }
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+
+        String token = userService.login(
+                request.getEmail(),
+                request.getPassword()
+        );
+
+        return ResponseEntity.ok(token);
+    }
+
 }
