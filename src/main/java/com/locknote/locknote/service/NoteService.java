@@ -6,6 +6,9 @@ import com.locknote.locknote.model.User;
 import com.locknote.locknote.repository.NoteRepository;
 import com.locknote.locknote.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import com.locknote.locknote.config.AesEncryptionUtil;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import java.util.List;
 
@@ -14,6 +17,9 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
+    @Value("${app.encryption.secret}")
+    private String encryptionSecret;
+
 
     public NoteService(NoteRepository noteRepository,
                        UserRepository userRepository) {
@@ -28,7 +34,11 @@ public class NoteService {
 
         Note note = new Note();
         note.setTitle(request.getTitle());
-        note.setContent(request.getContent());
+        String encryptedContent =
+                AesEncryptionUtil.encrypt(request.getContent(), encryptionSecret);
+
+        note.setContent(encryptedContent);
+
         note.setUser(user);
 
         return noteRepository.save(note);
@@ -36,6 +46,15 @@ public class NoteService {
 
     public List<Note> getNotes(String email) {
         User user = userRepository.findByEmail(email).orElseThrow();
-        return noteRepository.findByUserAndDeletedFalse(user);
+        List<Note> notes = noteRepository.findByUserAndDeletedFalse(user);
+
+        notes.forEach(note -> {
+            String decrypted =
+                    AesEncryptionUtil.decrypt(note.getContent(), encryptionSecret);
+            note.setContent(decrypted);
+        });
+
+        return notes;
+
     }
 }
