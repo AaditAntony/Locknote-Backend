@@ -80,4 +80,41 @@ public class NoteService {
 
         return notes;
     }
+
+    public Note updateNote(Long noteId, NoteRequest request, String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new RuntimeException("Note not found"));
+
+        // 🔒 Ownership check
+        if (!note.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized access");
+        }
+
+        note.setTitle(request.getTitle());
+
+        String encryptedContent =
+                AesEncryptionUtil.encrypt(
+                        request.getContent(),
+                        encryptionSecret
+                );
+
+        note.setContent(encryptedContent);
+
+        Note updated = noteRepository.save(note);
+
+        // Decrypt before return
+        updated.setContent(
+                AesEncryptionUtil.decrypt(
+                        updated.getContent(),
+                        encryptionSecret
+                )
+        );
+
+        return updated;
+    }
+
 }
