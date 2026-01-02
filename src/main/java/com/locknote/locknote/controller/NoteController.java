@@ -32,4 +32,28 @@ public class NoteController {
     public List<Note> list(Authentication authentication) {
         return noteService.getNotes(authentication.getName());
     }
+    @PutMapping("/{id}")
+    public Note updateNote(
+            @PathVariable Long id,
+            @RequestBody NoteRequest request,
+            Authentication authentication
+    ) {
+        return noteService.updateNote(
+                id,
+                request,
+                authentication.getName()
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteNote(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        noteService.deleteNote(
+                id,
+                authentication.getName()
+        );
+    }
+
 }
