@@ -116,5 +116,21 @@ public class NoteService {
 
         return updated;
     }
+    public void deleteNote(Long noteId, String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new RuntimeException("Note not found"));
+
+        // 🔒 Ownership check
+        if (!note.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized access");
+        }
+
+        note.setDeleted(true);
+        noteRepository.save(note);
+    }
 
 }
